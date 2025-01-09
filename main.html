@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solve Equations</title>
+    <script>
+        function parseEquation(equation) {
+            equation = equation.replace(/\s+/g, '');
+            let [lhs, rhs] = equation.split('=');
+            lhs = lhs.replace(/-/g, '+-');
+            rhs = rhs.replace(/-/g, '+-');
+
+            let [a, b] = parseSide(lhs);
+            let [c, d] = parseSide(rhs);
+
+            let A = a - c;
+            let B = b - d;
+            return [A, B];
+        }
+
+        function parseSide(side) {
+            let terms = side.split('+');
+            let a = 0, b = 0;
+            terms.forEach(term => {
+                if (term.includes('x')) {
+                    a += parseFloat(term.replace('x', ''));
+                } else {
+                    b += parseFloat(term);
+                }
+            });
+            return [a, b];
+        }
+
+        function solveForX(A, B) {
+            if (A === 0) {
+                throw new Error("No solution or infinite solutions exist.");
+            }
+            return -B / A;
+        }
+
+        function solveEquation(equation) {
+            let steps = [];
+            steps.push(`Step 1: Write down the equation: ${equation}`);
+
+            let [A, B] = parseEquation(equation);
+            steps.push(`Step 2: Convert to standard form Ax + B = 0: ${A}x + ${B} = 0`);
+
+            let xSolution = solveForX(A, B);
+            steps.push(`Step 3: Solve for x: x = ${xSolution}`);
+
+            return [xSolution, steps];
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const equation = document.getElementById('equation').value;
+            const resultDiv = document.getElementById('result');
+            const stepsDiv = document.getElementById('steps');
+
+            try {
+                const [solution, steps] = solveEquation(equation);
+                stepsDiv.innerHTML = steps.join('<br>');
+                resultDiv.innerHTML = `Solution: x = ${solution}`;
+            } catch (error) {
+                resultDiv.innerHTML = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Solve Equations</h1>
+    <form id="equationForm" onsubmit="handleFormSubmit(event)">
+        <label for="equation">Enter the equation (e.g., 2x+1=3x+6):</label>
+        <input type="text" id="equation" name="equation" required>
+        <button type="submit">Solve</button>
+    </form>
+    <div id="solution">
+        <h2>Solution:</h2>
+        <div id="steps"></div>
+        <div id="result"></div>
+    </div>
+</body>
+</html>
