@@ -24,9 +24,15 @@
             let a = 0, b = 0;
             terms.forEach(term => {
                 if (term.includes('x')) {
-                    a += parseFloat(term.replace('x', ''));
+                    let coef = parseFloat(term.replace('x', ''));
+                    if (!isNaN(coef)) {
+                        a += coef;
+                    }
                 } else {
-                    b += parseFloat(term);
+                    let constant = parseFloat(term);
+                    if (!isNaN(constant)) {
+                        b += constant;
+                    }
                 }
             });
             return [a, b];
