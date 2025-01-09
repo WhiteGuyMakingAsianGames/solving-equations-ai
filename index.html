@@ -10,26 +10,26 @@
         }
     </style>
     <script>
-        function parseEquation(equation) {
+        function parseEquation(equation, variable) {
             equation = equation.replace(/\s+/g, '');
             let [lhs, rhs] = equation.split('=');
             lhs = lhs.replace(/-/g, '+-');
             rhs = rhs.replace(/-/g, '+-');
 
-            let [a, b] = parseSide(lhs);
-            let [c, d] = parseSide(rhs);
+            let [a, b] = parseSide(lhs, variable);
+            let [c, d] = parseSide(rhs, variable);
 
             let A = a - c;
             let B = b - d;
             return [A, B];
         }
 
-        function parseSide(side) {
+        function parseSide(side, variable) {
             let terms = side.split('+');
             let a = 0, b = 0;
             terms.forEach(term => {
-                if (term.includes('x')) {
-                    let coef = parseFloat(term.replace('x', ''));
+                if (term.includes(variable)) {
+                    let coef = parseFloat(term.replace(variable, ''));
                     if (!isNaN(coef)) {
                         a += coef;
                     }
@@ -43,7 +43,7 @@
             return [a, b];
         }
 
-        function solveForX(A, B) {
+        function solveForVariable(A, B) {
             if (A === 0) {
                 throw new Error("No solution or infinite solutions exist.");
             }
@@ -51,16 +51,17 @@
         }
 
         function solveEquation(equation) {
+            let variable = equation.match(/[a-zA-Z]/g)[0];
             let steps = [];
             steps.push(`Step 1: Write down the equation: ${equation}`);
 
-            let [A, B] = parseEquation(equation);
-            steps.push(`Step 2: Convert to standard form Ax + B = 0: ${A}x + ${B} = 0`);
+            let [A, B] = parseEquation(equation, variable);
+            steps.push(`Step 2: Convert to standard form A${variable} + B = 0: ${A}${variable} + ${B} = 0`);
 
-            let xSolution = solveForX(A, B);
-            steps.push(`Step 3: Solve for x: x = ${xSolution}`);
+            let solution = solveForVariable(A, B);
+            steps.push(`Step 3: Solve for ${variable}: ${variable} = ${solution}`);
 
-            return [xSolution, steps];
+            return [solution, steps];
         }
 
         function handleFormSubmit(event) {
@@ -72,7 +73,7 @@
             try {
                 const [solution, steps] = solveEquation(equation);
                 stepsDiv.innerHTML = steps.join('<br>');
-                resultDiv.innerHTML = `Solution: x = ${solution}`;
+                resultDiv.innerHTML = `Solution: ${solution}`;
             } catch (error) {
                 resultDiv.innerHTML = `Error: ${error.message}`;
             }
