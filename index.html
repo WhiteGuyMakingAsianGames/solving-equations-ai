@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solve Equations</title>
+    <title>Solving for X Helper</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+        }
+    </style>
     <script>
         function parseEquation(equation) {
             equation = equation.replace(/\s+/g, '');
@@ -75,7 +80,7 @@
     </script>
 </head>
 <body>
-    <h1>Solve Equations</h1>
+    <h1>Solving for X Helper</h1>
     <form id="equationForm" onsubmit="handleFormSubmit(event)">
         <label for="equation">Enter the equation (e.g., 2x+1=3x+6):</label>
         <input type="text" id="equation" name="equation" required>
