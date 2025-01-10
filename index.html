@@ -51,9 +51,14 @@
         #error {
             color: red;
         }
+        .hidden {
+            display: none;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script>
+        let mode = 'equation';
+
         function parseEquation(equation, variable) {
             equation = equation.replace(/\s+/g, '');
             let [lhs, rhs] = equation.split('=');
@@ -155,12 +160,14 @@
                 let [root1, root2] = solveQuadratic(a, b, c);
                 steps.push(`Step 3: Solve the quadratic equation for ${variable}: ${variable} = ${root1} or ${variable} = ${root2}`);
                 return [[root1, root2], steps];
-            } else {
+            } else if (equation.includes('=')) {
                 let [A, B] = parseEquation(equation, variable);
                 steps.push(`Step 2: Convert to standard form A${variable} + B = 0: ${A}${variable} + ${B} = 0`);
                 let solution = solveForVariable(A, B);
                 steps.push(`Step 3: Solve for ${variable}: ${variable} = ${solution}`);
                 return [solution, steps];
+            } else {
+                throw new Error("Invalid equation format. Please use '=' for equations.");
             }
         }
 
@@ -188,7 +195,8 @@
             }
         }
 
-        function solveInequality() {
+        function solveInequality(event) {
+            event.preventDefault();
             const input = document.getElementById('inequality').value;
             const solution = document.getElementById('solution');
             const resultDiv = document.getElementById('result');
@@ -202,7 +210,7 @@
                 resultDiv.innerHTML = '';
                 errorDiv.innerHTML = '';
             } catch (error) {
-                solution.textContent = `Error: ${error.message}`;
+                errorDiv.innerHTML = `Error: ${error.message}`;
             }
         }
 
@@ -246,27 +254,48 @@
             const solution = -b / a;
             return operator === '<' ? `x < ${solution}` : `x > ${solution}`;
         }
+
+        function toggleMode() {
+            const equationForm = document.getElementById('equationForm');
+            const inequalityForm = document.getElementById('inequalityForm');
+            const modeButton = document.getElementById('modeButton');
+
+            if (mode === 'equation') {
+                mode = 'inequality';
+                equationForm.classList.add('hidden');
+                inequalityForm.classList.remove('hidden');
+                modeButton.textContent = 'Back to Equation Mode';
+            } else {
+                mode = 'equation';
+                equationForm.classList.remove('hidden');
+                inequalityForm.classList.add('hidden');
+                modeButton.textContent = 'Switch to Inequality Mode';
+            }
+        }
     </script>
 </head>
 <body>
     <h1>SolveBot AI</h1>
     <div id="instructions">
         <p>Enter your equation in the form of ax + b = c, ax^2 + bx + c = 0, or ax^3 + bx^2 + cx + d = 0</p>
-        <p>For inequalities, use symbols like >, <, >=, or <=</p>
+        <p>For inequalities, use symbols like > or <</p>
     </div>
     <form id="equationForm" onsubmit="handleFormSubmit(event)">
         <label for="equation">Enter the equation:</label>
         <input type="text" id="equation" name="equation" required>
         <button type="submit">Solve</button>
     </form>
+    <form id="inequalityForm" class="hidden" onsubmit="solveInequality(event)">
+        <label for="inequality">Enter the inequality:</label>
+        <input type="text" id="inequality" name="inequality" required>
+        <button type="submit">Solve</button>
+    </form>
+    <button id="modeButton" onclick="toggleMode()">Switch to Inequality Mode</button>
     <div id="solution">
         <h2>Solution:</h2>
         <div id="steps"></div>
         <div id="result"></div>
         <div id="error"></div>
     </div>
-    <input type="text" id="inequality" placeholder="Enter inequality (e.g., 2x - 2 < 3x)">
-    <button onclick="solveInequality()">Solve Inequality</button>
-    <p id="solution"></p>
 </body>
 </html>
