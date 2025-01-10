@@ -39,6 +39,13 @@
             margin-top: 20px;
             text-align: center;
         }
+        #instructions {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        #error {
+            color: red;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script>
@@ -75,7 +82,6 @@
         }
 
         function solveCubic(a, b, c, d) {
-            // Use Cardano's formula to solve cubic equations
             if (a === 0) return solveQuadratic(b, c, d);
             b /= a;
             c /= a;
@@ -163,19 +169,25 @@
             const equation = document.getElementById('equation').value;
             const resultDiv = document.getElementById('result');
             const stepsDiv = document.getElementById('steps');
+            const errorDiv = document.getElementById('error');
 
             try {
                 const [solution, steps] = solveEquation(equation);
                 stepsDiv.innerHTML = steps.join('<br>');
                 resultDiv.innerHTML = `Solution: ${Array.isArray(solution) ? solution.join(' or ') : solution}`;
+                errorDiv.innerHTML = '';
             } catch (error) {
-                resultDiv.innerHTML = `Error: ${error.message}`;
+                errorDiv.innerHTML = `Error: ${error.message}`;
             }
         }
     </script>
 </head>
 <body>
     <h1>Damiens Variable Solver AI</h1>
+    <div id="instructions">
+        <p>Enter your equation in the form of ax + b = c, ax^2 + bx + c = 0, or ax^3 + bx^2 + cx + d = 0</p>
+        <p>For inequalities, use symbols like >, <, >=, or <=</p>
+    </div>
     <form id="equationForm" onsubmit="handleFormSubmit(event)">
         <label for="equation">Enter the equation:</label>
         <input type="text" id="equation" name="equation" required>
@@ -185,6 +197,7 @@
         <h2>Solution:</h2>
         <div id="steps"></div>
         <div id="result"></div>
+        <div id="error"></div>
     </div>
 </body>
 </html>
