@@ -120,7 +120,11 @@
         }
 
         function solveEquation(equation) {
-            let variable = equation.match(/[a-zA-Z]/g)[0];
+            let variableMatch = equation.match(/[a-zA-Z]/g);
+            if (!variableMatch) {
+                throw new Error("No variable found in the equation.");
+            }
+            let variable = variableMatch[0];
             let steps = [];
             steps.push(`Step 1: Start with the equation: ${equation}`);
 
@@ -198,14 +202,14 @@
         function solveInequality(event) {
             event.preventDefault();
             const input = document.getElementById('inequality').value;
-            const solution = document.getElementById('solution');
+            const solutionDiv = document.getElementById('solution');
             const resultDiv = document.getElementById('result');
             const stepsDiv = document.getElementById('steps');
             const errorDiv = document.getElementById('error');
 
             try {
                 const result = processInequality(input);
-                solution.textContent = `Solution: ${result}`;
+                solutionDiv.textContent = `Solution: ${result}`;
                 stepsDiv.innerHTML = '';
                 resultDiv.innerHTML = '';
                 errorDiv.innerHTML = '';
