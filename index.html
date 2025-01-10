@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solving for X Helper</title>
+    <title>Damiens Variable Solver AI</title>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -14,23 +14,30 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
+            margin: 0;
         }
         h1 {
             font-family: 'Montserrat', sans-serif;
             font-size: 3em;
+            margin: 0;
         }
         form {
             background: rgba(255, 255, 255, 0.1);
             padding: 20px;
             border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         button {
             font-size: 1.2em;
             padding: 10px 20px;
             cursor: pointer;
+            margin-top: 10px;
         }
         #solution {
             margin-top: 20px;
+            text-align: center;
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
@@ -38,13 +45,9 @@
         function parseEquation(equation, variable) {
             equation = equation.replace(/\s+/g, '');
             let [lhs, rhs] = equation.split('=');
-
             let [a, b] = parseSide(lhs, variable);
             let [c, d] = parseSide(rhs, variable);
-
-            let A = a - c;
-            let B = b - d;
-            return [A, B];
+            return [a - c, b - d];
         }
 
         function parseSide(side, variable) {
@@ -53,15 +56,11 @@
             terms.forEach(term => {
                 if (term.includes(variable)) {
                     let coef = parseFloat(term.replace(variable, ''));
-                    if (isNaN(coef)) {
-                        coef = term.includes('-') ? -1 : 1;
-                    }
+                    if (isNaN(coef)) coef = term.includes('-') ? -1 : 1;
                     a += coef;
                 } else {
                     let constant = parseFloat(term);
-                    if (!isNaN(constant)) {
-                        b += constant;
-                    }
+                    if (!isNaN(constant)) b += constant;
                 }
             });
             return [a, b];
@@ -69,12 +68,39 @@
 
         function solveQuadratic(a, b, c) {
             let discriminant = b * b - 4 * a * c;
-            if (discriminant < 0) {
-                throw new Error("No real solutions exist.");
-            }
+            if (discriminant < 0) throw new Error("No real solutions exist.");
             let root1 = (-b + Math.sqrt(discriminant)) / (2 * a);
             let root2 = (-b - Math.sqrt(discriminant)) / (2 * a);
             return [root1, root2];
+        }
+
+        function solveCubic(a, b, c, d) {
+            // Use Cardano's formula to solve cubic equations
+            if (a === 0) return solveQuadratic(b, c, d);
+            b /= a;
+            c /= a;
+            d /= a;
+            let p = (3 * c - b * b) / 3;
+            let q = (2 * b * b * b - 9 * b * c + 27 * d) / 27;
+            let discriminant = q * q / 4 + p * p * p / 27;
+            let roots;
+            if (discriminant > 0) {
+                let u = Math.cbrt(-q / 2 + Math.sqrt(discriminant));
+                let v = Math.cbrt(-q / 2 - Math.sqrt(discriminant));
+                roots = [u + v - b / 3];
+            } else if (discriminant === 0) {
+                let u = Math.cbrt(-q / 2);
+                roots = [2 * u - b / 3, -u - b / 3];
+            } else {
+                let r = Math.sqrt(-p * p * p / 27);
+                let phi = Math.acos(-q / (2 * r));
+                roots = [
+                    2 * Math.cbrt(r) * Math.cos(phi / 3) - b / 3,
+                    2 * Math.cbrt(r) * Math.cos((phi + 2 * Math.PI) / 3) - b / 3,
+                    2 * Math.cbrt(r) * Math.cos((phi + 4 * Math.PI) / 3) - b / 3
+                ];
+            }
+            return roots;
         }
 
         function solveEquation(equation) {
@@ -82,63 +108,53 @@
             let steps = [];
             steps.push(`Step 1: Start with the equation: ${equation}`);
 
-            if (equation.includes('^')) {
+            if (equation.includes('^3')) {
                 let [lhs, rhs] = equation.split('=');
-
-                let [a, b, c] = [0, 0, 0];
+                let [a, b, c, d] = [0, 0, 0, 0];
                 lhs.split(/(?=[+-])/).forEach(term => {
-                    if (term.includes(variable + '^2')) {
-                        a += parseFloat(term.replace(variable + '^2', ''));
-                    } else if (term.includes(variable)) {
-                        b += parseFloat(term.replace(variable, ''));
-                    } else {
-                        c += parseFloat(term);
-                    }
+                    if (term.includes(variable + '^3')) a += parseFloat(term.replace(variable + '^3', ''));
+                    else if (term.includes(variable + '^2')) b += parseFloat(term.replace(variable + '^2', ''));
+                    else if (term.includes(variable)) c += parseFloat(term.replace(variable, ''));
+                    else d += parseFloat(term);
                 });
                 rhs.split(/(?=[+-])/).forEach(term => {
-                    if (term.includes(variable + '^2')) {
-                        a -= parseFloat(term.replace(variable + '^2', ''));
-                    } else if (term.includes(variable)) {
-                        b -= parseFloat(term.replace(variable, ''));
-                    } else {
-                        c -= parseFloat(term);
-                    }
+                    if (term.includes(variable + '^3')) a -= parseFloat(term.replace(variable + '^3', ''));
+                    else if (term.includes(variable + '^2')) b -= parseFloat(term.replace(variable + '^2', ''));
+                    else if (term.includes(variable)) c -= parseFloat(term.replace(variable, ''));
+                    else d -= parseFloat(term);
                 });
-
+                steps.push(`Step 2: Convert to standard form A${variable}^3 + B${variable}^2 + C${variable} + D = 0: ${a}${variable}^3 + ${b}${variable}^2 + ${c}${variable} + ${d} = 0`);
+                let roots = solveCubic(a, b, c, d);
+                steps.push(`Step 3: Solve the cubic equation for ${variable}: ${variable} = ${roots.join(' or ')}`);
+                return [roots, steps];
+            } else if (equation.includes('^2')) {
+                let [lhs, rhs] = equation.split('=');
+                let [a, b, c] = [0, 0, 0];
+                lhs.split(/(?=[+-])/).forEach(term => {
+                    if (term.includes(variable + '^2')) a += parseFloat(term.replace(variable + '^2', ''));
+                    else if (term.includes(variable)) b += parseFloat(term.replace(variable, ''));
+                    else c += parseFloat(term);
+                });
+                rhs.split(/(?=[+-])/).forEach(term => {
+                    if (term.includes(variable + '^2')) a -= parseFloat(term.replace(variable + '^2', ''));
+                    else if (term.includes(variable)) b -= parseFloat(term.replace(variable, ''));
+                    else c -= parseFloat(term);
+                });
                 steps.push(`Step 2: Convert to standard form A${variable}^2 + B${variable} + C = 0: ${a}${variable}^2 + ${b}${variable} + ${c} = 0`);
-
                 let [root1, root2] = solveQuadratic(a, b, c);
                 steps.push(`Step 3: Solve the quadratic equation for ${variable}: ${variable} = ${root1} or ${variable} = ${root2}`);
-
                 return [[root1, root2], steps];
-            } else if (equation.includes('/')) {
-                let [lhs, rhs] = equation.split('=');
-
-                let [numerator, denominator] = lhs.split('/').map(parseFloat);
-                let constant = parseFloat(rhs);
-                if (isNaN(numerator) || isNaN(denominator) || isNaN(constant)) {
-                    throw new Error("Invalid rational equation.");
-                }
-
-                let solution = numerator / constant;
-                steps.push(`Step 2: Multiply both sides by the denominator to solve for ${variable}: ${variable} = ${solution}`);
-
-                return [solution, steps];
             } else {
                 let [A, B] = parseEquation(equation, variable);
                 steps.push(`Step 2: Convert to standard form A${variable} + B = 0: ${A}${variable} + ${B} = 0`);
-
                 let solution = solveForVariable(A, B);
                 steps.push(`Step 3: Solve for ${variable}: ${variable} = ${solution}`);
-
                 return [solution, steps];
             }
         }
 
         function solveForVariable(A, B) {
-            if (A === 0) {
-                throw new Error("No solution or infinite solutions exist.");
-            }
+            if (A === 0) throw new Error("No solution or infinite solutions exist.");
             return -B / A;
         }
 
@@ -159,9 +175,9 @@
     </script>
 </head>
 <body>
-    <h1>Solving for X Helper</h1>
+    <h1>Damiens Variable Solver AI</h1>
     <form id="equationForm" onsubmit="handleFormSubmit(event)">
-        <label for="equation">Enter the equation (e.g., 2x+1=3x+6 or 4x^2+1=3x+2 or 1/x=2):</label>
+        <label for="equation">Enter the equation:</label>
         <input type="text" id="equation" name="equation" required>
         <button type="submit">Solve</button>
     </form>
