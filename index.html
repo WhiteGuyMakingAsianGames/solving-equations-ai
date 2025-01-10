@@ -180,6 +180,58 @@
                 errorDiv.innerHTML = `Error: ${error.message}`;
             }
         }
+        
+        function solveInequality() {
+            const input = document.getElementById('inequality').value;
+            const solution = document.getElementById('solution');
+            try {
+                const result = processInequality(input);
+                solution.textContent = `Solution: ${result}`;
+            } catch (error) {
+                solution.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        function processInequality(input) {
+            const inequalityMatch = input.match(/(.+)(<|>)(.+)/);
+            if (!inequalityMatch) {
+                throw new Error('Invalid inequality format');
+            }
+
+            const leftSide = inequalityMatch[1].trim();
+            const operator = inequalityMatch[2];
+            const rightSide = inequalityMatch[3].trim();
+
+            const leftCoefficients = parsePolynomial(leftSide);
+            const rightCoefficients = parsePolynomial(rightSide);
+
+            const coefficients = subtractPolynomials(leftCoefficients, rightCoefficients);
+
+            return solveLinear(coefficients, operator);
+        }
+
+        function parsePolynomial(polynomial) {
+            const terms = polynomial.split(/(?=[+-])/);
+            const coefficients = [0, 0]; 
+
+            terms.forEach(term => {
+                const match = term.match(/([+-]?[\d]*)(x)?/);
+                const coefficient = match[1] === '' || match[1] === '+' ? 1 : match[1] === '-' ? -1 : parseFloat(match[1]);
+                const power = match[2] ? 1 : 0;
+                coefficients[power] = coefficient;
+            });
+
+            return coefficients;
+        }
+
+        function subtractPolynomials(left, right) {
+            return left.map((coef, index) => coef - (right[index] || 0));
+        }
+
+        function solveLinear([b, a], operator) {
+            const solution = -b / a;
+            return operator === '<' ? `x < ${solution}` : `x > ${solution}`;
+        }
     </script>
 </head>
 <body>
@@ -199,5 +251,8 @@
         <div id="result"></div>
         <div id="error"></div>
     </div>
+    <input type="text" id="inequality" placeholder="Enter inequality (e.g., 2x - 2 < 3x)">
+    <button onclick="solveInequality()">Solve Inequality</button>
+    <p id="solution"></p>
 </body>
 </html>
