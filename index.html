@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Damiens Variable Solver AI</title>
+    <title>SolveBot AI</title>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background: linear-gradient(to right, #1e3c72, #2a5298);
+            background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
             color: white;
             display: flex;
             flex-direction: column;
@@ -19,10 +19,11 @@
         h1 {
             font-family: 'Montserrat', sans-serif;
             font-size: 3em;
+            color: #00c6ff;
             margin: 0;
         }
         form {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 198, 255, 0.1);
             padding: 20px;
             border-radius: 10px;
             display: flex;
@@ -34,6 +35,10 @@
             padding: 10px 20px;
             cursor: pointer;
             margin-top: 10px;
+            background-color: #00c6ff;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
         }
         #solution {
             margin-top: 20px;
@@ -170,23 +175,32 @@
             const resultDiv = document.getElementById('result');
             const stepsDiv = document.getElementById('steps');
             const errorDiv = document.getElementById('error');
+            const solutionDiv = document.getElementById('solution');
 
             try {
                 const [solution, steps] = solveEquation(equation);
                 stepsDiv.innerHTML = steps.join('<br>');
                 resultDiv.innerHTML = `Solution: ${Array.isArray(solution) ? solution.join(' or ') : solution}`;
                 errorDiv.innerHTML = '';
+                solutionDiv.textContent = '';
             } catch (error) {
                 errorDiv.innerHTML = `Error: ${error.message}`;
             }
         }
-        
+
         function solveInequality() {
             const input = document.getElementById('inequality').value;
             const solution = document.getElementById('solution');
+            const resultDiv = document.getElementById('result');
+            const stepsDiv = document.getElementById('steps');
+            const errorDiv = document.getElementById('error');
+
             try {
                 const result = processInequality(input);
                 solution.textContent = `Solution: ${result}`;
+                stepsDiv.innerHTML = '';
+                resultDiv.innerHTML = '';
+                errorDiv.innerHTML = '';
             } catch (error) {
                 solution.textContent = `Error: ${error.message}`;
             }
@@ -235,7 +249,7 @@
     </script>
 </head>
 <body>
-    <h1>Damiens Variable Solver AI</h1>
+    <h1>SolveBot AI</h1>
     <div id="instructions">
         <p>Enter your equation in the form of ax + b = c, ax^2 + bx + c = 0, or ax^3 + bx^2 + cx + d = 0</p>
         <p>For inequalities, use symbols like >, <, >=, or <=</p>
