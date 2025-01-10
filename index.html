@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SolveBot AI</title>
+    <title>Damiens Variable Solver AI</title>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+            background: linear-gradient(to right, #1e3c72, #2a5298);
             color: white;
             display: flex;
             flex-direction: column;
@@ -19,11 +19,10 @@
         h1 {
             font-family: 'Montserrat', sans-serif;
             font-size: 3em;
-            color: #00c6ff;
             margin: 0;
         }
         form {
-            background: rgba(0, 198, 255, 0.1);
+            background: rgba(255, 255, 255, 0.1);
             padding: 20px;
             border-radius: 10px;
             display: flex;
@@ -35,10 +34,6 @@
             padding: 10px 20px;
             cursor: pointer;
             margin-top: 10px;
-            background-color: #00c6ff;
-            border: none;
-            border-radius: 5px;
-            color: #fff;
         }
         #solution {
             margin-top: 20px;
@@ -51,14 +46,9 @@
         #error {
             color: red;
         }
-        .hidden {
-            display: none;
-        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script>
-        let mode = 'equation';
-
         function parseEquation(equation, variable) {
             equation = equation.replace(/\s+/g, '');
             let [lhs, rhs] = equation.split('=');
@@ -120,11 +110,7 @@
         }
 
         function solveEquation(equation) {
-            let variableMatch = equation.match(/[a-zA-Z]/g);
-            if (!variableMatch) {
-                throw new Error("No variable found in the equation.");
-            }
-            let variable = variableMatch[0];
+            let variable = equation.match(/[a-zA-Z]/g)[0];
             let steps = [];
             steps.push(`Step 1: Start with the equation: ${equation}`);
 
@@ -164,14 +150,12 @@
                 let [root1, root2] = solveQuadratic(a, b, c);
                 steps.push(`Step 3: Solve the quadratic equation for ${variable}: ${variable} = ${root1} or ${variable} = ${root2}`);
                 return [[root1, root2], steps];
-            } else if (equation.includes('=')) {
+            } else {
                 let [A, B] = parseEquation(equation, variable);
                 steps.push(`Step 2: Convert to standard form A${variable} + B = 0: ${A}${variable} + ${B} = 0`);
                 let solution = solveForVariable(A, B);
                 steps.push(`Step 3: Solve for ${variable}: ${variable} = ${solution}`);
                 return [solution, steps];
-            } else {
-                throw new Error("Invalid equation format. Please use '=' for equations.");
             }
         }
 
@@ -186,115 +170,29 @@
             const resultDiv = document.getElementById('result');
             const stepsDiv = document.getElementById('steps');
             const errorDiv = document.getElementById('error');
-            const solutionDiv = document.getElementById('solution');
 
             try {
                 const [solution, steps] = solveEquation(equation);
                 stepsDiv.innerHTML = steps.join('<br>');
                 resultDiv.innerHTML = `Solution: ${Array.isArray(solution) ? solution.join(' or ') : solution}`;
                 errorDiv.innerHTML = '';
-                solutionDiv.textContent = '';
             } catch (error) {
                 errorDiv.innerHTML = `Error: ${error.message}`;
-            }
-        }
-
-        function solveInequality(event) {
-            event.preventDefault();
-            const input = document.getElementById('inequality').value;
-            const solutionDiv = document.getElementById('solution');
-            const resultDiv = document.getElementById('result');
-            const stepsDiv = document.getElementById('steps');
-            const errorDiv = document.getElementById('error');
-
-            try {
-                const result = processInequality(input);
-                solutionDiv.textContent = `Solution: ${result}`;
-                stepsDiv.innerHTML = '';
-                resultDiv.innerHTML = '';
-                errorDiv.innerHTML = '';
-            } catch (error) {
-                errorDiv.innerHTML = `Error: ${error.message}`;
-            }
-        }
-
-        function processInequality(input) {
-            const inequalityMatch = input.match(/(.+)(<|>)(.+)/);
-            if (!inequalityMatch) {
-                throw new Error('Invalid inequality format');
-            }
-
-            const leftSide = inequalityMatch[1].trim();
-            const operator = inequalityMatch[2];
-            const rightSide = inequalityMatch[3].trim();
-
-            const leftCoefficients = parsePolynomial(leftSide);
-            const rightCoefficients = parsePolynomial(rightSide);
-
-            const coefficients = subtractPolynomials(leftCoefficients, rightCoefficients);
-
-            return solveLinear(coefficients, operator);
-        }
-
-        function parsePolynomial(polynomial) {
-            const terms = polynomial.split(/(?=[+-])/);
-            const coefficients = [0, 0]; 
-
-            terms.forEach(term => {
-                const match = term.match(/([+-]?[\d]*)(x)?/);
-                const coefficient = match[1] === '' || match[1] === '+' ? 1 : match[1] === '-' ? -1 : parseFloat(match[1]);
-                const power = match[2] ? 1 : 0;
-                coefficients[power] = coefficient;
-            });
-
-            return coefficients;
-        }
-
-        function subtractPolynomials(left, right) {
-            return left.map((coef, index) => coef - (right[index] || 0));
-        }
-
-        function solveLinear([b, a], operator) {
-            const solution = -b / a;
-            return operator === '<' ? `x < ${solution}` : `x > ${solution}`;
-        }
-
-        function toggleMode() {
-            const equationForm = document.getElementById('equationForm');
-            const inequalityForm = document.getElementById('inequalityForm');
-            const modeButton = document.getElementById('modeButton');
-
-            if (mode === 'equation') {
-                mode = 'inequality';
-                equationForm.classList.add('hidden');
-                inequalityForm.classList.remove('hidden');
-                modeButton.textContent = 'Back to Equation Mode';
-            } else {
-                mode = 'equation';
-                equationForm.classList.remove('hidden');
-                inequalityForm.classList.add('hidden');
-                modeButton.textContent = 'Switch to Inequality Mode';
             }
         }
     </script>
 </head>
 <body>
-    <h1>SolveBot AI</h1>
+    <h1>Damiens Variable Solver AI</h1>
     <div id="instructions">
         <p>Enter your equation in the form of ax + b = c, ax^2 + bx + c = 0, or ax^3 + bx^2 + cx + d = 0</p>
-        <p>For inequalities, use symbols like > or <</p>
+        <p>For inequalities, use symbols like >, <, >=, or <=</p>
     </div>
     <form id="equationForm" onsubmit="handleFormSubmit(event)">
         <label for="equation">Enter the equation:</label>
         <input type="text" id="equation" name="equation" required>
         <button type="submit">Solve</button>
     </form>
-    <form id="inequalityForm" class="hidden" onsubmit="solveInequality(event)">
-        <label for="inequality">Enter the inequality:</label>
-        <input type="text" id="inequality" name="inequality" required>
-        <button type="submit">Solve</button>
-    </form>
-    <button id="modeButton" onclick="toggleMode()">Switch to Inequality Mode</button>
     <div id="solution">
         <h2>Solution:</h2>
         <div id="steps"></div>
